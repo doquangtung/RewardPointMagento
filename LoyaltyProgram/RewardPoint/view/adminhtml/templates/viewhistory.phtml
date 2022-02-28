@@ -1,0 +1,205 @@
+<h2>Custumer Information:</h2>
+<hr>
+<h3>Name: 
+     <?php
+            /**
+             * @var \LoyaltyProgram\RewardPoint\Block\MyPoint $block
+             */
+          //   echo $block->getUserId();
+
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+            $connection = $resource->getConnection();
+            $tableCustomer = $resource->getTableName('customer_entity');
+            $sqlGetName = $connection->select('*')->from($tableCustomer)->where(
+              $tableCustomer . '.entity_id = ' .  $block->getUserId());
+            foreach ($connection->fetchAll($sqlGetName) as $rowUserName){   
+                  echo " " . $rowUserName['firstname'] . " " . $rowUserName['lastname'];
+            }
+
+     ?></h3>
+<h3>Level VIP: 
+     <?php
+            /**
+             * @var \LoyaltyProgram\RewardPoint\Block\MyPoint $block
+             */
+          //   echo $block->getUserId();
+
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+            $connection = $resource->getConnection();
+            $table = $resource->getTableName('current_point'); //gives table name
+
+            $sqlEarn = $connection->select('*')->from($table)->where(
+                $table . '.entity_id = ' . $block->getUserId()
+            );
+            
+            foreach ($connection->fetchAll($sqlEarn) as $row){   
+            echo " " . $row['vip'];
+            }
+
+     ?></h3>
+<h3>Point:  
+     <?php
+            /**
+             * @var \LoyaltyProgram\RewardPoint\Block\MyPoint $block
+             */
+          //   echo $block->getUserId();
+
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+            $connection = $resource->getConnection();
+            $table = $resource->getTableName('current_point'); //gives table name
+
+            $sqlEarn = $connection->select('*')->from($table)->where(
+                $table . '.entity_id = ' . $block->getUserId()
+            );
+            
+            foreach ($connection->fetchAll($sqlEarn) as $row){   
+            echo " " . $row['point'];
+            }
+
+     ?>
+     points</h3>
+<h3>Spend:<?php
+            /**
+             * @var \LoyaltyProgram\RewardPoint\Block\MyPoint $block
+             */
+          //   echo $block->getUserId();
+
+          $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+          $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+          $connection = $resource->getConnection();
+          $tableSpend = $resource->getTableName('user_spend'); //gives table name
+
+          $sqlSpend = $connection->select('*')->from($tableSpend)->where(
+          $tableSpend . '.entity_id = ' . $block->getUserId());
+          $resultSpend = $connection->fetchAll($sqlSpend);  
+          if (count($resultSpend) == 0) {
+            $dataSpend = [
+                    'entity_id' => $block->getUserId(),
+                    'spend' => 0,
+                ];
+            $connection->insert($tableSpend, $dataSpend);
+           }
+          $sqlGetSpend = $connection->select('*')->from($tableSpend)->where(
+          $tableSpend . '.entity_id = ' . $block->getUserId());
+
+          foreach ($connection->fetchAll($sqlGetSpend) as $rowSpend){   
+                echo " " . $rowSpend['spend'];
+          }
+        ?> USD</h3>
+<hr>
+<br>
+<h2>Point History</h2>
+<div class="responsive-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Point</th>
+                <th>Reasson</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php
+            /**
+             * @var \LoyaltyProgram\RewardPoint\Block\AllActivity $block
+             */
+
+            // echo $block->sayHello();
+
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+            $connection = $resource->getConnection();
+            $table = $resource->getTableName('history_point'); //gives table name
+            
+
+            $sql = $connection->select('*')->from($table)->where(
+                $table . '.entity_id = ' . $block->getUserId()
+            );
+            
+            
+            foreach ($connection->fetchAll($sql) as $row){   
+            echo "<tr>";
+            if (is_null($row['order_id'])) echo "<td class=\"add-point\"> +" . $row['history_point'] . "</td>";
+            else echo "<td class=\"remove-point\"> -" . $row['history_point'] . "</td>";
+            echo "<td>" . $row['history_reason'] . "</td>";
+            echo "<td>" . $row['history_date'] . "</td>";
+            echo "</tr>"; 
+            }
+        ?>
+        </tbody>
+    </table>
+</div>
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+.my_title {
+  font-weight: bold;
+  color: black;
+}
+.my_content {
+  font-weight: normal;
+  font-size: 1.2em;
+  color: gray;
+}
+.responsive-table table{
+    width: 80%;
+}
+.responsive-table th {
+  font-weight: bold;
+  font-size: 1.2em;
+  text-align: left;
+  color: black;
+}
+
+.responsive-table td {
+  font-weight: normal;
+  font-size: 1em;
+  -webkit-box-shadow: 0 2px 2px -2px #57585a;
+  -moz-box-shadow: 0 2px 2px -2px #57585a;
+  box-shadow: 0 2px 2px -2px #57585a;
+}
+
+.responsive-table {
+  margin-top: 10px;
+  text-align: left;
+  overflow: hidden;
+  width: 100%;
+  margin: 0 auto;
+  display: block;
+  padding: 0 0 8em 0;
+}
+
+.responsive-table td, .responsive-table th {
+  padding-bottom: 1%;
+  padding-top: 1%;
+  padding-left:1%;  
+}
+
+/* Background-color of the odd rows */
+.responsive-table tr:nth-child(odd) {
+    background-color: white
+}
+
+/* Background-color of the even rows */
+.responsive-table tr:nth-child(even) {
+    background-color: #e8eaee;
+}
+
+.responsive-table th {
+  background-color: white;
+}
+.remove-point { color: #e02909; }
+
+.add-point {
+  color: #08c722;
+}
+</style>
+
+<!-- <?php
+$object = \Magento\Framework\App\ObjectManager::getInstance();
+$url = $object->get(\Magento\Backend\Model\UrlInterface::class);
+echo "<a href=\"/magento241/admin/customer/index/edit/id/" . $block->getUserId() . "/key/" . $url->getSecretKey() . "/\" class=\"action-link\"><span>" . $block->escapeHtml(__('View more about this Customer?')) . "</span></a>" ?> -->

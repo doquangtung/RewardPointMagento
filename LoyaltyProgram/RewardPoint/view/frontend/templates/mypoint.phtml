@@ -1,0 +1,210 @@
+<h2>Reward Point Information</h2>
+<hr>
+<h3>You are 
+     <?php
+            /**
+             * @var \LoyaltyProgram\RewardPoint\Block\MyPoint $block
+             */
+          //   echo $block->getCustomerId();
+
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+            $connection = $resource->getConnection();
+            $table = $resource->getTableName('current_point'); //gives table name
+
+            $sqlEarn = $connection->select('*')->from($table)->where(
+                $table . '.entity_id = ' . $block->getCustomerId()
+            );
+            
+            foreach ($connection->fetchAll($sqlEarn) as $row){   
+            echo $row['vip'];
+            }
+
+     ?></h3>
+ 
+<p><?php
+            /**
+             * @var \LoyaltyProgram\RewardPoint\Block\MyPoint $block
+             */
+          //   echo $block->getCustomerId();
+
+          $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+          $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+          $connection = $resource->getConnection();
+          $table = $resource->getTableName('current_point'); //gives table name
+          $tableSpend = $resource->getTableName('user_spend'); //gives table name
+          $tableAllVip = $resource->getTableName('vip'); //gives table name
+          $tableGoal = $resource->getTableName('goal'); //gives table name
+
+          $sqlSpend = $connection->select('*')->from($tableSpend)->where(
+          $tableSpend . '.entity_id = ' . $block->getCustomerId());
+          $resultSpend = $connection->fetchAll($sqlSpend);  
+          if (count($resultSpend) == 0) {
+            $dataSpend = [
+                    'entity_id' => $block->getCustomerId(),
+                    'spend' => 0,
+                ];
+            $connection->insert($tableSpend, $dataSpend);
+           }
+          $sqlGetSpend = $connection->select('*')->from($tableSpend)->where(
+          $tableSpend . '.entity_id = ' . $block->getCustomerId());
+
+          foreach ($connection->fetchAll($sqlGetSpend) as $rowSpend){   
+                $userSpend = $rowSpend['spend'];
+          }
+
+          $sqlVip = $connection->select('*')->from($table)->where(
+              $table . '.entity_id = ' . $block->getCustomerId()
+          );
+          
+          foreach ($connection->fetchAll($sqlVip) as $row){   
+              $userVip = $row['vip'];
+          }
+
+        $checkVip = 0;
+        $sqlMaxVip = $connection->select('*')->from($tableAllVip)->join(
+            $tableGoal, 
+            $tableAllVip . '.goal_id = ' . $tableGoal . '.goal_id'
+        )->order(array('goal.goal_number ASC'));
+        foreach ($connection->fetchAll($sqlMaxVip) as $rowMaxVip) {
+            $maxVip = $rowMaxVip['vip_name'];
+        }
+        if ($userVip != $maxVip) {
+            $sqlAllVip = $connection->select('*')->from($tableAllVip)->join(
+                $tableGoal, 
+                $tableAllVip . '.goal_id = ' . $tableGoal . '.goal_id'
+            );
+            foreach ($connection->fetchAll($sqlAllVip) as $rowAllVip){   
+                if ($checkVip == 1) {
+                    $needVip = $rowAllVip['goal_number'] - $userSpend;
+                    echo "You need spend " . $needVip . " USD to be " . $rowAllVip['vip_name'];
+                    break;
+                }
+                if ($rowAllVip['vip_name'] == $userVip) $checkVip = 1;
+            }
+        } else  echo "Your level Vip is max";
+        ?></p>
+
+<h3>You have 
+     <?php
+            /**
+             * @var \LoyaltyProgram\RewardPoint\Block\MyPoint $block
+             */
+          //   echo $block->getCustomerId();
+
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+            $connection = $resource->getConnection();
+            $table = $resource->getTableName('current_point'); //gives table name
+
+            $sqlEarn = $connection->select('*')->from($table)->where(
+                $table . '.entity_id = ' . $block->getCustomerId()
+            );
+            
+            foreach ($connection->fetchAll($sqlEarn) as $row){   
+            echo $row['point'];
+            }
+
+     ?>
+     points</h3>
+<p style="font-weight: bold;">Current exchange rate</p>
+<p><?php
+            /**
+             * @var \LoyaltyProgram\RewardPoint\Block\MyPoint $block
+             */
+          //   echo $block->getCustomerId();
+
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+            $connection = $resource->getConnection();
+            $table = $resource->getTableName('current_point'); //gives table name
+            $tableVip = $resource->getTableName('vip'); //gives table name
+
+            $sqlEarn = $connection->select('*')->from($table)->join(
+                   $tableVip, 
+                   $table . '.vip = ' . $tableVip . '.vip_name'
+               )->where(
+                $table . '.entity_id = ' . $block->getCustomerId()
+            );
+            
+            foreach ($connection->fetchAll($sqlEarn) as $row){   
+            echo $row['vip_rate'];
+            }
+
+        ?> points = 1 USD</p>
+<hr>
+<br>
+<div class="dropdown ">
+  <button  style="padding: 0px;" onclick="showHistory()" class="btndrop text-left"><h2>Point History</h2></button>
+  <!-- <div id="myDropdown" class="dropdown-content">
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </div> -->
+  <div id="myDropdown" class="responsive-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Point</th>
+                <th>Reasson</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php
+            /**
+             * @var \LoyaltyProgram\RewardPoint\Block\AllActivity $block
+             */
+
+            // echo $block->sayHello();
+
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+            $connection = $resource->getConnection();
+            $table = $resource->getTableName('history_point'); //gives table name
+            
+
+            $sql = $connection->select('*')->from($table)->where(
+                $table . '.entity_id = ' . $block->getCustomerId()
+            );
+            
+            
+            foreach ($connection->fetchAll($sql) as $row){   
+            echo "<tr>";
+            if (is_null($row['order_id'])) echo "<td class=\"add-point\"> +" . $row['history_point'] . "</td>";
+            else echo "<td class=\"remove-point\"> -" . $row['history_point'] . "</td>";
+            echo "<td>" . $row['history_reason'] . "</td>";
+            echo "<td>" . $row['history_date'] . "</td>";
+            echo "</tr>"; 
+            }
+
+        ?>
+        </tbody>
+    </table>
+</div>
+<hr>
+</div>
+
+<script>
+/* When the user clicks on the button, 
+toggle between hiding and showing the dropdown content */
+function showHistory() {
+  document.getElementById("myDropdown").classList.toggle("show");
+}
+
+// Close the dropdown if the user clicks outside of it
+// window.onclick = function(event) {
+//   if (!event.target.matches('.btndrop')) {
+//     var dropdowns = document.getElementsByClassName("responsive-table");
+//     var i;
+//     for (i = 0; i < dropdowns.length; i++) {
+//       var openDropdown = dropdowns[i];
+//       if (openDropdown.classList.contains('show')) {
+//         openDropdown.classList.remove('show');
+//       }
+//     }
+//   }
+// }
+</script>
+
+</body>

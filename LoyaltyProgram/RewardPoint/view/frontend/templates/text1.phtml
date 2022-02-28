@@ -1,0 +1,68 @@
+<?php 
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+        $connection = $resource->getConnection();
+        $table = $resource->getTableName('using_point'); //gives table name
+        $tableVip = $resource->getTableName('current_point'); //gives table name
+        $tableAllVip = $resource->getTableName('vip'); //gives table name
+
+            $sqlVip = $connection->select('*')->from($tableVip)->join(
+                   $tableAllVip, 
+                   $tableVip . '.vip = ' . $tableAllVip . '.vip_name'
+               )->where(
+                $tableVip . '.entity_id = ' . $block->getCustomerId()
+            );
+            
+            foreach ($connection->fetchAll($sqlVip) as $rowVip){   
+            $rate = $rowVip['vip_rate'];
+            }
+
+        $sql = $connection->select('*')->from($table)->where(
+            $table . '.entity_id = ' . $block->getCustomerId()
+        );
+        $result = $connection->fetchAll($sql);  
+        if (count($result) == 0) {
+            $cart = $objectManager->get('\Magento\Checkout\Model\Cart'); 
+            $grandTotal = $cart->getQuote()->getGrandTotal();
+            $max = $grandTotal * $rate;
+            if ($max > $block->getCustomerPoint()) {
+                $max = $block->getCustomerPoint();
+            }
+            echo 'Your rate is ' . $rate . ' point = 1 USD <br>';
+            echo '<strong>Enter point:</strong>';
+            echo '<form name="orderPoint" method="POST" id="orderPoint" action="/magento241/rewardpointfront/orderpoint/orderpoint">';
+            echo '<input type="number" id="orderPoint" name="orderPoint" placeHolder="Entrer Point here" min="1" max="'. $max. '">';
+            echo '<input type="submit" id="orderPointSubmit"  name="orderPointSubmit" value="Apply">';
+            echo '</form>';
+        } else {
+            $cart = $objectManager->get('\Magento\Checkout\Model\Cart'); 
+            $grandTotal = $cart->getQuote()->getGrandTotal();
+            $max = $grandTotal * $rate;
+            if ($max > $block->getCustomerPoint()) {
+                $max = $block->getCustomerPoint();
+            }
+            foreach ($connection->fetchAll($sql) as $row){   
+                $point = $row['point'];
+            }
+            echo 'Your rate is ' . $rate . ' point = 1 USD <br>';
+            echo '<form name="resetPoint" method="POST" id="resetPoint" action="/magento241/rewardpointfront/orderpoint/resetpoint">';
+            echo '<strong>Point using: '. $point . '   </strong>';
+            echo '<input type="submit" id="resetPointSubmit"  name="resetPointSubmit" value="Reset">';
+            echo '</form>';
+
+            
+            
+            // echo '<strong>Change point:</strong>';
+            // echo '<form name="orderPoint" method="POST" id="orderPoint" action="/magento241/rewardpointfront/orderpoint/orderpoint">';
+            // echo '<input type="number" id="orderPoint" name="orderPoint" placeHolder="Entrer Point here" min="1" max="'. $max. '">';
+            // echo '<input type="submit" id="orderPointSubmit"  name="orderPointSubmit" value="Apply">';
+            // echo '</form>';
+
+        }
+?>
+
+
+    <!-- <strong><?php echo __('Enter point:')?></strong>
+    <?php echo '<input type="number" id="orderPoint" name="orderPoint" placeHolder="Entrer Point here" min="1" max="'. $block->getCustomerPoint(). '">';?>
+    <input type="submit" id="orderPointSubmit"  name="orderPointSubmit" value="Apply">
+</form> -->
